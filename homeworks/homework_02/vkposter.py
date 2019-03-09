@@ -9,7 +9,9 @@ from homeworks.homework_02.fastmerger import FastSortedListMerger
 class VKPoster:
 
     def __init__(self):
-        raise NotImplementedError
+        self.posts = {}  #post_id:{'host':user_id
+                         #         'seen':{user_id_s} }
+        self.users = {}  #user_id:{'following:{user_id_s} }
 
     def user_posted_post(self, user_id: int, post_id: int):
         '''
@@ -19,7 +21,8 @@ class VKPoster:
         :param post_id: id поста. Число.
         :return: ничего
         '''
-        pass
+        self.posts[post_id] = {'host': user_id}
+        self.posts[post_id]['seen'] = set()
 
     def user_read_post(self, user_id: int, post_id: int):
         '''
@@ -29,7 +32,10 @@ class VKPoster:
         :param post_id: id поста. Число.
         :return: ничего
         '''
-        pass
+        try:
+            self.posts[post_id]['seen'].add(user_id)
+        except KeyError:
+            self.posts[post_id] = {'seen': {user_id}}
 
     def user_follow_for(self, follower_user_id: int, followee_user_id: int):
         '''
@@ -39,7 +45,11 @@ class VKPoster:
         :param followee_user_id: id пользователя. Число.
         :return: ничего
         '''
-        pass
+        if follower_user_id in self.users:
+            self.users[follower_user_id]['following'].add(
+                    followee_user_id)
+        else:
+            self.users[follower_user_id] = {'following': {followee_user_id}}
 
     def get_recent_posts(self, user_id: int, k: int)-> list:
         '''
@@ -50,7 +60,12 @@ class VKPoster:
         :return: Список из post_id размером К из свежих постов в
         ленте пользователя. list
         '''
-        pass
+        news = []
+        for post in self.posts.keys():
+            if self.posts[post]['host'] in self.users[user_id]['following']:
+                news.append(post)
+
+        return sorted(news, reverse=True)[:k]
 
     def get_most_popular_posts(self, k: int) -> list:
         '''
@@ -60,4 +75,12 @@ class VKPoster:
         необходимо вывести. Число.
         :return: Список из post_id размером К из популярных постов. list
         '''
-        pass
+        news = []
+        most_popular = []
+
+        for key in self.posts.keys():
+            news.append((key, len(self.posts[key]['seen'])))
+
+        news.sort(reverse=True, key=lambda el: el[1])
+        print(news)
+        return sorted([news[i][0] for i in range(k)], reverse=True)
