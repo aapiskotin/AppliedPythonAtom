@@ -9,9 +9,8 @@ from homeworks.homework_02.fastmerger import FastSortedListMerger
 class VKPoster:
 
     def __init__(self):
-        self.posts = {}  #post_id:{'host':user_id
-                         #         'seen':{user_id_s} }
-        self.users = {}  #user_id:{'following:{user_id_s} }
+        self.posts = {}  # post_id:{'host':user_id, 'seen':{user_id_s} }
+        self.users = {}  # user_id:{'following:{user_id_s} }
 
     def user_posted_post(self, user_id: int, post_id: int):
         '''
@@ -81,6 +80,9 @@ class VKPoster:
         for key in self.posts.keys():
             news.append((key, len(self.posts[key]['seen'])))
 
-        news.sort(reverse=True, key=lambda el: el[1])
-        print(news)
-        return sorted([news[i][0] for i in range(k)], reverse=True)
+        news.sort(reverse=True, key=lambda el: el[0])
+        while(len(most_popular) < k):
+            max_pop = max(news, key=lambda el: el[1])
+            most_popular.append(max_pop[0])
+            news.remove(max_pop)
+        return most_popular
