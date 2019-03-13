@@ -17,7 +17,6 @@ class FileLoader:
         except FileNotFoundError:
             raise FileNotFoundError('Файл не валиден')
 
-
         try:
             table = json.load(fh)
             if len(table) < 1:
