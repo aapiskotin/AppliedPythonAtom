@@ -1,4 +1,5 @@
 import sys
+from exceptions import *
 
 
 def parse_json(json_object):
@@ -8,10 +9,10 @@ def parse_json(json_object):
     for item in json_object:
         row = list(item.values())
         if set(row.keys) != set(columns):
-            print('Формат не валиден 1jtt')
+            raise FormatError('Формат не валиден')
             sys.exit()
         if len(row) != len(columns):
-            print('Формат не валиден 2jtt')
+            raise FormatError('Формат не валиден')
             sys.exit()
         cells.append(row)
 

@@ -1,5 +1,7 @@
 import sys
 
+from exceptions import FormatError
+
 
 def parse_tsv(raw_string):
     cells = raw_string.split('\n')
@@ -14,5 +16,5 @@ def parse_tsv(raw_string):
 def validate_tsv(cells):
     for row in cells:
         if len(row) != len(cells[0]):
-            print('Формат не валиден 1ttt')
+            raise FormatError('Формат не валиден')
             sys.exit()

@@ -1,5 +1,6 @@
 import sys
 import json
+from exceptions import *
 from json import JSONDecodeError
 
 
@@ -14,22 +15,20 @@ class FileLoader:
         except UnicodeDecodeError:
             fh = open(self.filename, 'r', encoding='cp1251')
         except FileNotFoundError:
-            print('Файл не найден')
-            sys.exit()
+            raise FileNotFoundError('Файл не валиден')
+
 
         try:
             table = json.load(fh)
             if len(table) < 1:
-                print('Формат не валиден 1fl')
-                sys.exit()
+                raise FormatError('Формат не валиден')
             self.format = 'json'
             fh.close()
         except JSONDecodeError:
             table = fh.read()
             self.format = 'tsv'
             if len(table) == 0:
-                print('Формат не валиден')
-                sys.exit()
+                raise FormatError('Формат не валиден')
             fh.close()
 
         return table
