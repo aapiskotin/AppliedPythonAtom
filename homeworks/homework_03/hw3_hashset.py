@@ -7,7 +7,6 @@ from homeworks.homework_03.hw3_hashmap import HashMap
 class HashSet(HashMap):
 
     def get(self, key, default_value=None):
-        # TODO достаточно переопределить данный метод
         index = self._get_index(self._get_hash(key))
         if self.array[index] is None:
             return default_value
@@ -18,7 +17,6 @@ class HashSet(HashMap):
             return default_value
 
     def put(self, key):
-        # TODO метод put, нужно переопределить данный метод
         index = self._get_index(self._get_hash(key))
         if self.array[index] is None:
             self.array[index] = [key]
@@ -35,17 +33,10 @@ class HashSet(HashMap):
         if self.size * 2 // 3 >= len(self.array):
             self._resize()
 
-    def __len__(self):
-        # TODO Возвращает количество Entry в массиве
-        return self.size
-
     def values(self):
-        # TODO возвращать итератор значений
         return HashMap.Iterator(self)
 
     def intersect(self, another_hashset):
-        # TODO метод, возвращающий новый HashSet
-        #  элементы - пересечение текущего и другого
         new_set = HashSet()
         for key in self.values():
             if key in another_hashset:
