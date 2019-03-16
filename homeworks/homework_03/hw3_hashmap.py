@@ -14,69 +14,153 @@ class HashMap:
             :param key: ключ
             :param value: значение
             '''
+            self.key = key
+            self.value = value
 
         def get_key(self):
-            # TODO возвращаем ключ
-            raise NotImplementedError
+            return self.key
 
         def get_value(self):
-            # TODO возвращаем значение
-            raise NotImplementedError
+            return self.value
 
         def __eq__(self, other):
-            # TODO реализовать функцию сравнения
-            raise NotImplementedError
+            return self == other
 
     def __init__(self, bucket_num=64):
         '''
         Реализуем метод цепочек
         :param bucket_num: число бакетов при инициализации
         '''
-        raise NotImplementedError
+        self.array = [None] * bucket_num
+        self.size = 0
 
     def get(self, key, default_value=None):
-        # TODO метод get, возвращающий значение,
-        #  если оно присутствует, иначе default_value
-        raise NotImplementedError
+        index = self._get_index(self._get_hash(key))
+        if self.array[index] is None:
+            return default_value
+        else:
+            for entry in self.array[index]:
+                if entry.get_key() == key:
+                    return entry.get_value()
 
     def put(self, key, value):
-        # TODO метод put, кладет значение по ключу,
-        #  в случае, если ключ уже присутствует он его заменяет
-        raise NotImplementedError
+        if isinstance(key, HashMap):
+            for entry_tuple in key.items():
+                self.put(*entry_tuple)
+        index = self._get_index(self._get_hash(key))
+        if self.array[index] is None:
+            self.array[index] = [Entry(key, value)]
+        else:
+            for i in range(len(self.array[index])):
+                if self.array[index][i].get_key() == key:
+                    self.array[index].pop(i)
+                    break
+            self.array[index].append(Entry(key, value))
+        self.size += 1
+        if self.size * 2 // 3 >= len(self.array):
+            self._resize()
 
     def __len__(self):
-        # TODO Возвращает количество Entry в массиве
-        raise NotImplementedError
+        return self.size
 
     def _get_hash(self, key):
-        # TODO Вернуть хеш от ключа,
-        #  по которому он кладется в бакет
-        raise NotImplementedError
+        if isinstance(key, (int, float)):
+            return int(key)
+        elif isinstance(key, str):
+            hash_func = 0
+            for char in key:
+                hash_func += ord(char)
+            return hash_func
+        else:
+            raise TypeError
 
     def _get_index(self, hash_value):
-        # TODO По значению хеша вернуть индекс элемента в массиве
-        raise NotImplementedError
+        return hash_value % len(self.array)
+
+    class ValuesIterator:
+        def __init__(self):
+            self.bucket_i = 0
+            self.chain_i = 0
+
+        def __iter__(self):
+            return self
+
+        def __next__(self):
+            if self.bucket_i < len(self.array):
+                if self.array[self.bucket_i] is None:
+                    self.bucket_i += 1
+                elif self.chain_i < len(self.array[self.bucket_i]):
+                    self.chain_i += 1
+                    cur_entry = self.array[self.bucket_i][self.chain_i - 1]
+                    return cur_entry.get_value()
+                else:
+                    self.bucket_i += 1
+                    self.chain_i = 0
+            else:
+                raise StopIteration
+
 
     def values(self):
-        # TODO Должен возвращать итератор значений
-        raise NotImplementedError
+        return ValuesIterator()
+
+    class KeysIterator:
+        def __init__(self):
+            self.bucket_i = 0
+            self.chain_i = 0
+
+        def __iter__(self):
+            return self
+
+        def __next__(self):
+            if self.bucket_i < len(self.array):
+                if self.array[self.bucket_i] is None:
+                    self.bucket_i += 1
+                elif self.chain_i < len(self.array[self.bucket_i]):
+                    self.chain_i += 1
+                    cur_entry = self.array[self.bucket_i][self.chain_i - 1]
+                    return cur_entry.get_key()
+                else:
+                    self.bucket_i += 1
+                    self.chain_i = 0
+            else:
+                raise StopIteration
 
     def keys(self):
-        # TODO Должен возвращать итератор ключей
-        raise NotImplementedError
+        return KeysIterator()
+
+    class ItemIterator:
+        def __init__(self):
+            self.bucket_i = 0
+            self.chain_i = 0
+
+        def __iter__(self):
+            return self
+
+        def __next__(self):
+            if self.bucket_i < len(self.array):
+                if self.array[self.bucket_i] is None:
+                    self.bucket_i += 1
+                elif self.chain_i < len(self.array[self.bucket_i]):
+                    self.chain_i += 1
+                    cur_entry = self.array[self.bucket_i][self.chain_i - 1]
+                    return (cur_entry.get_key(), cur_entry.get_value())
+                else:
+                    self.bucket_i += 1
+                    self.chain_i = 0
+            else:
+                raise StopIteration
 
     def items(self):
-        # TODO Должен возвращать итератор пар ключ и значение (tuples)
-        raise NotImplementedError
+        return ItemIterator()
 
     def _resize(self):
-        # TODO Время от времени нужно ресайзить нашу хешмапу
-        raise NotImplementedError
+        self.array.extend([None] * len(self.array))
 
     def __str__(self):
-        # TODO Метод выводит "buckets: {}, items: {}"
-        raise NotImplementedError
+        return "buckets: " + str(self.array) + ", items: " + str(list(self.items()))
 
     def __contains__(self, item):
-        # TODO Метод проверяющий есть ли объект (через in)
-        raise NotImplementedError
+        if self.array[self._get_index(self._get_hash)] is None:
+            return False
+        else:
+            return True
