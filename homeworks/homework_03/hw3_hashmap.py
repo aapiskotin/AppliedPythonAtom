@@ -24,7 +24,7 @@ class HashMap:
             return self.value
 
         def __eq__(self, other):
-            return self == other
+            return (self.key, self.value) == other
 
     def __init__(self, bucket_num=64):
         '''
@@ -46,52 +46,47 @@ class HashMap:
     def put(self, key, value):
         if isinstance(key, HashMap):
             for entry_tuple in key.items():
-                self.put(*entry_tuple)
-        index = self._get_index(self._get_hash(key))
-        if self.array[index] is None:
-            self.array[index] = [Entry(key, value)]
-        else:
-            for i in range(len(self.array[index])):
-                if self.array[index][i].get_key() == key:
-                    self.array[index].pop(i)
+                if entry_tuple is None:
                     break
-            self.array[index].append(Entry(key, value))
-        self.size += 1
-        if self.size * 2 // 3 >= len(self.array):
-            self._resize()
+                self.put(*entry_tuple)
+        else:
+            index = self._get_index(self._get_hash(key))
+            if self.array[index] is None:
+                self.array[index] = [HashMap.Entry(key, value)]
+            else:
+                for i in range(len(self.array[index])):
+                    if self.array[index][i].get_key() == key:
+                        self.array[index][i] = HashMap.Entry(key, value)
+                        break
+            self.size += 1
+            if self.size * 2 // 3 >= len(self.array):
+                self._resize()
 
     def __len__(self):
         return self.size
 
     def _get_hash(self, key):
-        if isinstance(key, (int, float)):
-            return int(key)
-        elif isinstance(key, str):
-            hash_func = 0
-            for char in key:
-                hash_func += ord(char)
-            return hash_func
-        else:
-            raise TypeError
+        return hash(key)
 
     def _get_index(self, hash_value):
         return hash_value % len(self.array)
 
     class ValuesIterator:
-        def __init__(self):
+        def __init__(self, hashmap):
             self.bucket_i = 0
             self.chain_i = 0
+            self.hash = hashmap
 
         def __iter__(self):
             return self
 
         def __next__(self):
-            if self.bucket_i < len(self.array):
-                if self.array[self.bucket_i] is None:
+            if self.bucket_i < len(self.hash.array):
+                if self.hash.array[self.bucket_i] is None:
                     self.bucket_i += 1
-                elif self.chain_i < len(self.array[self.bucket_i]):
+                elif self.chain_i < len(self.hash.array[self.bucket_i]):
                     self.chain_i += 1
-                    cur_entry = self.array[self.bucket_i][self.chain_i - 1]
+                    cur_entry = self.hash.array[self.bucket_i][self.chain_i - 1]
                     return cur_entry.get_value()
                 else:
                     self.bucket_i += 1
@@ -101,23 +96,24 @@ class HashMap:
 
 
     def values(self):
-        return ValuesIterator()
+        return HashMap.ValuesIterator(self)
 
     class KeysIterator:
-        def __init__(self):
+        def __init__(self, hashmap):
             self.bucket_i = 0
             self.chain_i = 0
+            self.hash = hashmap
 
         def __iter__(self):
             return self
 
         def __next__(self):
-            if self.bucket_i < len(self.array):
-                if self.array[self.bucket_i] is None:
+            if self.bucket_i < len(self.hash.array):
+                if self.hash.array[self.bucket_i] is None:
                     self.bucket_i += 1
-                elif self.chain_i < len(self.array[self.bucket_i]):
+                elif self.chain_i < len(self.hash.array[self.bucket_i]):
                     self.chain_i += 1
-                    cur_entry = self.array[self.bucket_i][self.chain_i - 1]
+                    cur_entry = self.hash.array[self.bucket_i][self.chain_i - 1]
                     return cur_entry.get_key()
                 else:
                     self.bucket_i += 1
@@ -126,23 +122,24 @@ class HashMap:
                 raise StopIteration
 
     def keys(self):
-        return KeysIterator()
+        return HashMap.KeysIterator(self)
 
     class ItemIterator:
-        def __init__(self):
+        def __init__(self, hashmap):
             self.bucket_i = 0
             self.chain_i = 0
+            self.hashmap = hashmap
 
         def __iter__(self):
             return self
 
         def __next__(self):
-            if self.bucket_i < len(self.array):
-                if self.array[self.bucket_i] is None:
+            if self.bucket_i < len(self.hashmap.array):
+                if self.hashmap.array[self.bucket_i] is None:
                     self.bucket_i += 1
-                elif self.chain_i < len(self.array[self.bucket_i]):
+                elif self.chain_i < len(self.hashmap.array[self.bucket_i]):
                     self.chain_i += 1
-                    cur_entry = self.array[self.bucket_i][self.chain_i - 1]
+                    cur_entry = self.hashmap.array[self.bucket_i][self.chain_i - 1]
                     return (cur_entry.get_key(), cur_entry.get_value())
                 else:
                     self.bucket_i += 1
@@ -151,10 +148,21 @@ class HashMap:
                 raise StopIteration
 
     def items(self):
-        return ItemIterator()
+        return HashMap.ItemIterator(self)
 
     def _resize(self):
-        self.array.extend([None] * len(self.array))
+        new_array = [None] * 2 * len(self.array)
+        for bucket in self.array:
+            if bucket is None:
+                continue
+            key = bucket[0].get_key()
+            index = self._get_index(self._get_hash(key))
+            if new_array[index] is None:
+                new_array[index] = bucket
+            else:
+                new_array[index].extend(bucket)
+
+        self.array = new_array
 
     def __str__(self):
         return "buckets: " + str(self.array) + ", items: " + str(list(self.items()))
