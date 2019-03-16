@@ -32,6 +32,28 @@ class HashMap:
         def __str__(self):
             return self.key + ': ' + self.value
 
+    class Iterator:
+        def __init__(self, hashmap):
+            self.bucket_i = 0
+            self.chain_i = 0
+            self.hash = hashmap
+
+        def __iter__(self):
+            return self
+
+        def __next__(self):
+            while(self.bucket_i < len(self.hash.array)):
+                if self.hash.array[self.bucket_i] is None:
+                    self.bucket_i += 1
+                elif self.chain_i < len(self.hash.array[self.bucket_i]):
+                    entry = self.hash.array[self.bucket_i][self.chain_i]
+                    self.chain_i += 1
+                    return entry
+                else:
+                    self.bucket_i += 1
+                    self.chain_i = 0
+            raise StopIteration
+
     def __init__(self, bucket_num=64):
         '''
         Реализуем метод цепочек
@@ -77,77 +99,23 @@ class HashMap:
     def _get_index(self, hash_value):
         return hash_value % len(self.array)
 
-    class ValuesIterator:
-        def __init__(self, hashmap):
-            self.bucket_i = 0
-            self.chain_i = 0
-            self.hash = hashmap
-
-        def __iter__(self):
-            return self
-
+    class ValuesIterator(Iterator):
         def __next__(self):
-            while(self.bucket_i < len(self.hash.array)):
-                if self.hash.array[self.bucket_i] is None:
-                    self.bucket_i += 1
-                elif self.chain_i < len(self.hash.array[self.bucket_i]):
-                    cur_entry = self.hash.array[self.bucket_i][self.chain_i]
-                    self.chain_i += 1
-                    return cur_entry.get_value()
-                else:
-                    self.bucket_i += 1
-                    self.chain_i = 0
-            raise StopIteration
+            return super().__next__().get_value()
 
     def values(self):
         return HashMap.ValuesIterator(self)
 
-    class KeysIterator:
-        def __init__(self, hashmap):
-            self.bucket_i = 0
-            self.chain_i = 0
-            self.hash = hashmap
-
-        def __iter__(self):
-            return self
-
+    class KeysIterator(Iterator):
         def __next__(self):
-            while(self.bucket_i < len(self.hash.array)):
-                if self.hash.array[self.bucket_i] is None:
-                    self.bucket_i += 1
-                elif self.chain_i < len(self.hash.array[self.bucket_i]):
-                    cur_entry = self.hash.array[self.bucket_i][self.chain_i]
-                    self.chain_i += 1
-                    return cur_entry.get_key()
-                else:
-                    self.bucket_i += 1
-                    self.chain_i = 0
-            raise StopIteration
+            return super().__next__().get_key()
 
     def keys(self):
         return HashMap.KeysIterator(self)
 
-    class ItemIterator:
-        def __init__(self, hashmap):
-            self.bucket_i = 0
-            self.chain_i = 0
-            self.hash = hashmap
-
-        def __iter__(self):
-            return self
-
+    class ItemIterator(Iterator):
         def __next__(self):
-            while(self.bucket_i < len(self.hash.array)):
-                if self.hash.array[self.bucket_i] is None:
-                    self.bucket_i += 1
-                elif self.chain_i < len(self.hash.array[self.bucket_i]):
-                    cur_entry = self.hash.array[self.bucket_i][self.chain_i]
-                    self.chain_i += 1
-                    return cur_entry.get_item()
-                else:
-                    self.bucket_i += 1
-                    self.chain_i = 0
-            raise StopIteration
+            return super().__next__().get_item()
 
     def items(self):
         return HashMap.ItemIterator(self)
