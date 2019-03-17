@@ -1,5 +1,8 @@
 #!/usr/bin/env python
 # coding: utf-8
+from collections import deque
+from collections import namedtuple
+from collections import Counter
 
 
 class TEventStats:
@@ -7,7 +10,8 @@ class TEventStats:
 
     def __init__(self):
         # TODO: реализовать метод
-        raise NotImplementedError
+        self.events_list = deque()
+        self.event = namedtuple('Event', 'user_id time')
 
     def register_event(self, user_id, time):
         """
@@ -17,7 +21,7 @@ class TEventStats:
         :return: None
         """
         # TODO: реализовать метод
-        raise NotImplementedError
+        self.events_list.append(self.event(user_id=user_id, time=time))
 
     def query(self, count, time):
         """
@@ -29,4 +33,23 @@ class TEventStats:
         :return: activity_count: int
         """
         # TODO: реализовать метод
-        raise NotImplementedError
+        start_time = time - 300
+        start_i = 0
+        for i in range(len(self.events_list)):
+            if self.events_list[i].time > start_time:
+                start_i = i
+                break
+
+        end_i = 0
+        for i in range(len(self.events_list) - 1, -1, -1):
+            if self.events_list[i].time <= time:
+                end_i = i
+                break
+
+        counted = Counter(list(map(lambda k: k[0], list(self.events_list)[start_i:end_i + 1])))
+        result = 0
+        for value in counted.values():
+            if value == count:
+                result += 1
+
+        return result
