@@ -2,6 +2,10 @@
 # coding: utf-8
 
 
+import os
+import shutil
+
+
 class Requester:
     '''
     Какой-то класс, который умеет делать запросы
@@ -12,6 +16,18 @@ class Requester:
 
     def post(self, host, port, filename, data):
         return False
+
+
+class MockRequester(Requester):
+    def get(self, host, port, filename):
+        with open(filename.replace('tmpf/', 'homeworks/homework_03/test_dir/', 1) +
+                  '.tmp', "r") as f:
+            return f.read()
+
+    def post(self, host, port, filename, data):
+        with open(filename.replace('homeworks/homework_03/test_dir', 'tmpf', 1) +
+                  '.tmp', "w") as f:
+            f.write('\n'.join(data))
 
 
 class RemoteFileReader(Requester):
@@ -43,7 +59,7 @@ class OrdinaryFileWorker(RemoteFileReader):
             f.write(super().read_file(filename))
 
 
-class MockOrdinaryFileWorker(OrdinaryFileWorker):
+class MockOrdinaryFileWorker(OrdinaryFileWorker, MockRequester):
     '''
     Необходимо отнаследовать данный класс так, чтобы
      он вместо запросов на удаленный сервер:
@@ -58,7 +74,19 @@ class MockOrdinaryFileWorker(OrdinaryFileWorker):
      если еще не создана
     '''
     def __init__(self):
-        raise NotImplementedError
+        self._host = 1337
+        self._port = 228
+        if not os.path.exists('tmpf'):
+            os.makedirs('tmpf')
+
+    def transfer_to_remote(self, filename):
+        super().transfer_to_remote('homeworks/homework_03/test_dir/' + filename)
+
+    def transfer_to_local(self, filename):
+        super().transfer_to_local('tmpf/' + filename)
+
+    def __del__(self):
+        shutil.rmtree('tmpf')
 
 
 class LLNode:
