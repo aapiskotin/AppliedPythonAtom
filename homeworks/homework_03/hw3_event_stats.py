@@ -9,7 +9,6 @@ class TEventStats:
     FIVE_MIN = 300
 
     def __init__(self):
-        # TODO: реализовать метод
         self.events_list = deque()
         self.event = namedtuple('Event', 'user_id time')
 
@@ -20,7 +19,6 @@ class TEventStats:
         :param time: время (timestamp)
         :return: None
         """
-        # TODO: реализовать метод
         self.events_list.append(self.event(user_id=user_id, time=time))
 
     def query(self, count, time):
@@ -32,7 +30,6 @@ class TEventStats:
         :param time: время для рассчета интервала
         :return: activity_count: int
         """
-        # TODO: реализовать метод
         start_time = time - 300
         start_i = 0
         for i in range(len(self.events_list)):
