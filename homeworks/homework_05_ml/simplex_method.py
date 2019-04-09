@@ -30,8 +30,10 @@ def simplex_method(a, b, c):
         pivot_row = np.argmin(simplex_table[:-1, -1] / simplex_table[:-1, pivot_column])
         min_indices[pivot_row] = pivot_column
         simplex_table[pivot_row] /= simplex_table[pivot_row, pivot_column]
-        simplex_table[:pivot_row] -= simplex_table[:pivot_row, pivot_column].reshape(-1, 1) * simplex_table[pivot_row].reshape(1, -1)
-        simplex_table[pivot_row + 1:] -= simplex_table[pivot_row + 1:, pivot_column].reshape(-1, 1) * simplex_table[pivot_row].reshape(1, -1)
+        simplex_table[:pivot_row] -= simplex_table[:pivot_row, pivot_column].reshape(-1, 1) * \
+            simplex_table[pivot_row].reshape(1, -1)
+        simplex_table[pivot_row + 1:] -= simplex_table[pivot_row + 1:, pivot_column].reshape(-1, 1) * \
+            simplex_table[pivot_row].reshape(1, -1)
 
     result = np.zeros_like(c)
     for i in range(len(min_indices)):
